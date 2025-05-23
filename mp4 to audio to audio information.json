@@ -1,5 +1,4 @@
 {
-  "name": "get audio data from video",
   "nodes": [
     {
       "parameters": {
@@ -27,7 +26,7 @@
             },
             {
               "name": "Authorization",
-              "value": "Bearer api_production_37970f31d4e601fc2f3fd954da34b33b8de466e4093437a8729eebdd30af9953.682f91ea7f27f063364dc502.682f9282ca1ff64b50ce1ad7"
+              "value": "Bearer api_production_3b80bc47743a9be9bed409bbb5ee442f2e980ba991903cb8863826c2878b89df.68304a267f27f063364dcf4d.68304a51ca1ff64b50ce25dd"
             }
           ]
         },
@@ -58,7 +57,7 @@
             },
             {
               "name": "Authorization",
-              "value": "Bearer api_production_37970f31d4e601fc2f3fd954da34b33b8de466e4093437a8729eebdd30af9953.682f91ea7f27f063364dc502.682f9282ca1ff64b50ce1ad7"
+              "value": "Bearer api_production_3b80bc47743a9be9bed409bbb5ee442f2e980ba991903cb8863826c2878b89df.68304a267f27f063364dcf4d.68304a51ca1ff64b50ce25dd"
             }
           ]
         },
@@ -88,7 +87,7 @@
             },
             {
               "name": "Authorization",
-              "value": "Bearer api_production_37970f31d4e601fc2f3fd954da34b33b8de466e4093437a8729eebdd30af9953.682f91ea7f27f063364dc502.682f9282ca1ff64b50ce1ad7"
+              "value": "Bearer api_production_3b80bc47743a9be9bed409bbb5ee442f2e980ba991903cb8863826c2878b89df.68304a267f27f063364dcf4d.68304a51ca1ff64b50ce25dd"
             }
           ]
         },
@@ -115,12 +114,11 @@
         -200
       ],
       "id": "b684d3d5-4f87-4b88-8b2c-ea4580b38a79",
-      "name": "mb3 data"
+      "name": "mb3 data",
+      "onError": "continueErrorOutput"
     },
     {
-      "parameters": {
-        "amount": 20
-      },
+      "parameters": {},
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
@@ -141,7 +139,7 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.9,
       "position": [
-        1300,
+        1520,
         -200
       ],
       "id": "aaf8427b-f0e7-4429-b131-4e4d3e436b5a",
@@ -156,7 +154,7 @@
       "type": "@n8n/n8n-nodes-langchain.openAi",
       "typeVersion": 1.8,
       "position": [
-        1080,
+        1300,
         -200
       ],
       "id": "de981825-c973-4f8a-b075-3d6cc6465082",
@@ -180,7 +178,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        1328,
+        1548,
         20
       ],
       "id": "2c98260a-5c93-418d-9967-5715b4ef3a20",
@@ -199,7 +197,7 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
       "position": [
-        1448,
+        1668,
         20
       ],
       "id": "7b1a4f9a-9d63-4e52-a449-c5bc01db791e",
@@ -253,8 +251,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.9,
       "position": [
-        -460,
-        260
+        -420,
+        320
       ],
       "id": "6378934d-9c5a-4282-ade2-2e388619b56f",
       "name": "AI Agent1"
@@ -285,8 +283,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -432,
-        480
+        -420,
+        540
       ],
       "id": "1a96f58d-59b6-47f5-b011-bb0fe29e3f2f",
       "name": "OpenAI Chat Model1",
@@ -333,8 +331,8 @@
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2,
       "position": [
-        -312,
-        480
+        -280,
+        560
       ],
       "id": "17ba2351-cb17-40b6-89a3-2521727989a4",
       "name": "get audio information"
@@ -342,7 +340,7 @@
     {
       "parameters": {
         "content": "## 🎬 mp4 to audio to audio information  \n**Double click** to edit me. This process involves:  \n1. Extracting audio from an MP4 file.  \n2. Converting audio to a suitable format (e.g., MP3, WAV).  \n3. Analyzing audio to extract information (e.g., transcription, metadata). ",
-        "height": 460,
+        "height": 640,
         "width": 2540
       },
       "type": "n8n-nodes-base.stickyNote",
@@ -363,15 +361,87 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        -900,
-        200
+        -860,
+        300
       ],
       "typeVersion": 1,
       "id": "a057ff04-a2fb-4e90-a6d5-144bb59c73e4",
       "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f746d43c-e8be-461f-9491-e267cc42a60f",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "failed",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        740,
+        160
+      ],
+      "id": "b72915b0-bbfe-4fa8-92b9-ec71c9dd4480",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "your mission is to say sorry but your i can't convert this video to mp3 ,download the video and put it in valide mp4 link or use another video ",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        960,
+        60
+      ],
+      "id": "3b8892bd-a63f-417e-bef6-3c270c2ebad1",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        920,
+        180
+      ],
+      "id": "293e5d5b-fae3-4441-96de-6116b653abb5",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "rSoveQq9TwvnQLpn",
+          "name": "OpenAi account"
+        }
+      }
     }
   ],
-  "pinData": {},
   "connections": {
     "Detect Video Link": {
       "main": [
@@ -410,7 +480,7 @@
       "main": [
         [
           {
-            "node": "mb3 data",
+            "node": "If",
             "type": "main",
             "index": 0
           }
@@ -422,6 +492,13 @@
         [
           {
             "node": "Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
             "type": "main",
             "index": 0
           }
@@ -526,17 +603,46 @@
           }
         ]
       ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "mb3 data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": true,
-  "settings": {
-    "executionOrder": "v1"
+  "pinData": {
+    "When Executed by Another Workflow": [
+      {
+        "videoLink": "https://cdn.loom.com/sessions/thumbnails/c823578e48064c1cbd8220c984a92df7-00001.mp4"
+      }
+    ]
   },
-  "versionId": "c80b61f6-fc26-4e79-b40e-53bebe059306",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "4e99b0def325e423ad6804aff0320f82e4725b75c472ec8f81c7e80fe68505e6"
-  },
-  "id": "JeaTtOcGl4LZxk6d",
-  "tags": []
+  }
 }

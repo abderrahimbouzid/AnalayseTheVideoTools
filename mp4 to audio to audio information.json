@@ -1,0 +1,542 @@
+{
+  "name": "get audio data from video",
+  "nodes": [
+    {
+      "parameters": {
+        "functionCode": "const input = $json[\"videoLink\"];\nconst videoRegex = /(https?:\\/\\/(?:www\\.)?(?:youtube\\.com\\/watch\\?v=|youtu\\.be\\/|loom\\.com\\/share\\/|vimeo\\.com\\/|.*\\.mp4|.*\\.mov)[^\\s]*)/gi;\nconst matches = input.match(videoRegex);\n\nreturn {\n  hasVideoLink: matches !== null,\n  videoLink: matches ? matches[0] : \"\"\n};"
+      },
+      "name": "Detect Video Link",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        -200
+      ],
+      "id": "959a64a8-07e5-462d-ba44-651313a790b3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.freeconvert.com/v1/process/import/url",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer api_production_37970f31d4e601fc2f3fd954da34b33b8de466e4093437a8729eebdd30af9953.682f91ea7f27f063364dc502.682f9282ca1ff64b50ce1ad7"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"url\": \"{{ $json.videoLink }}\",\n  \"filename\": \"some.mp4\"\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -20,
+        -200
+      ],
+      "id": "27c8596f-f2a4-468a-a4d9-d61da5a84b17",
+      "name": "upload video to free convert"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.freeconvert.com/v1/process/convert",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer api_production_37970f31d4e601fc2f3fd954da34b33b8de466e4093437a8729eebdd30af9953.682f91ea7f27f063364dc502.682f9282ca1ff64b50ce1ad7"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"input\": \"{{ $json.id }}\",\n  \"input_format\": \"mp4\",\n  \"output_format\": \"mp3\",\n  \"options\": {\n    \n  }\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        200,
+        -200
+      ],
+      "id": "01afb9ee-c135-461a-b136-8d28299b07b9",
+      "name": "Convert to mp3"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.freeconvert.com/v1/process/tasks/{{ $json.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer api_production_37970f31d4e601fc2f3fd954da34b33b8de466e4093437a8729eebdd30af9953.682f91ea7f27f063364dc502.682f9282ca1ff64b50ce1ad7"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        -200
+      ],
+      "id": "5357aa98-c76b-42b6-8d85-dd11186e4b01",
+      "name": "get audio"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.result.url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        860,
+        -200
+      ],
+      "id": "b684d3d5-4f87-4b88-8b2c-ea4580b38a79",
+      "name": "mb3 data"
+    },
+    {
+      "parameters": {
+        "amount": 20
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        420,
+        -200
+      ],
+      "id": "3b4c6409-16dc-4933-b0d4-bf5a9d28e3f5",
+      "name": "Wait",
+      "webhookId": "36b886c0-1d36-438d-aea9-1a4eefe6fb1e"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an AI assistant tasked with analyzing text to infer the speaker's English accent.\nBased on the provided transcript, please output the following:\n\n1.  **Accent Classification:** (e.g., American English (General), British English (RP), Australian English, Indian English, Scottish English, Irish English, Canadian English, South African English, etc. Be as specific as possible if the text provides enough clues.)\n2.  **Confidence Score:** (A percentage from 0% to 100% representing your confidence in this accent classification based on the textual evidence.)\n3.  **Summary/Explanation:** (A brief explanation of the linguistic cues, word choices, spelling, or phonetic suggestions in the transcript that led to your classification. This part is optional but helpful.)\n\nTranscript:\n---\n{{ $json.text }}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        1300,
+        -200
+      ],
+      "id": "aaf8427b-f0e7-4429-b131-4e4d3e436b5a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1080,
+        -200
+      ],
+      "id": "de981825-c973-4f8a-b075-3d6cc6465082",
+      "name": "Transcript",
+      "credentials": {
+        "openAiApi": {
+          "id": "rSoveQq9TwvnQLpn",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1328,
+        20
+      ],
+      "id": "2c98260a-5c93-418d-9967-5715b4ef3a20",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "rSoveQq9TwvnQLpn",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"Accent\": \"American\",\n\t\"confidence_in_English\": \"90%\",\n     \"summary\":\"summary of the transcript\"\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1448,
+        20
+      ],
+      "id": "7b1a4f9a-9d63-4e52-a449-c5bc01db791e",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! 👋\nI'm audioChat — your assistant to get  all information you need from video mp4",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -680,
+        260
+      ],
+      "id": "4f273865-2cff-4cd7-8738-08683cd940f8",
+      "name": "When chat message received",
+      "webhookId": "686a97ac-e86c-4cb2-a9f6-3b435385bff2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e962db88-58b3-49eb-ac98-dffb9f747e60",
+              "name": "videoLink",
+              "value": "={{ $json.videoLink }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -460,
+        -200
+      ],
+      "id": "94e29dde-75d4-4616-a469-d4c47c912f45",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=your mission is to get  {{ $json.chatInput }} and detect the video link if there is  and send it to get audio information tools and get the all output and send it to user , if there is no link answer using openai",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        -460,
+        260
+      ],
+      "id": "6378934d-9c5a-4282-ade2-2e388619b56f",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "{\n  \"videoLink\": \"link\"\n}"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -680,
+        -200
+      ],
+      "id": "a1b4277b-6629-4572-8699-670e58699e87",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -432,
+        480
+      ],
+      "id": "1a96f58d-59b6-47f5-b011-bb0fe29e3f2f",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "rSoveQq9TwvnQLpn",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "use this node to get \"Classification of the accent (e.g., British, American, Australian, etc.)\n\n \n\n  - A confidence in English accent score (e.g., 0-100%)\n\n \n\n  - A short summary or explanation\" ",
+        "workflowId": {
+          "__rl": true,
+          "value": "JeaTtOcGl4LZxk6d",
+          "mode": "list",
+          "cachedResultName": "get audio data from video"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "videoLink": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('videoLink', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "videoLink"
+          ],
+          "schema": [
+            {
+              "id": "videoLink",
+              "displayName": "videoLink",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        -312,
+        480
+      ],
+      "id": "17ba2351-cb17-40b6-89a3-2521727989a4",
+      "name": "get audio information"
+    },
+    {
+      "parameters": {
+        "content": "## 🎬 mp4 to audio to audio information  \n**Double click** to edit me. This process involves:  \n1. Extracting audio from an MP4 file.  \n2. Converting audio to a suitable format (e.g., MP3, WAV).  \n3. Analyzing audio to extract information (e.g., transcription, metadata). ",
+        "height": 460,
+        "width": 2540
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -820,
+        -360
+      ],
+      "typeVersion": 1,
+      "id": "ca2e3340-224f-4dab-ac12-8fbd444418f6",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "#### 🤖 Chatbot – Provide MP4 URL  ",
+        "height": 480,
+        "width": 1080,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -900,
+        200
+      ],
+      "typeVersion": 1,
+      "id": "a057ff04-a2fb-4e90-a6d5-144bb59c73e4",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Detect Video Link": {
+      "main": [
+        [
+          {
+            "node": "upload video to free convert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "upload video to free convert": {
+      "main": [
+        [
+          {
+            "node": "Convert to mp3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to mp3": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get audio": {
+      "main": [
+        [
+          {
+            "node": "mb3 data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mb3 data": {
+      "main": [
+        [
+          {
+            "node": "Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "get audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcript": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Detect Video Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get audio information": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c80b61f6-fc26-4e79-b40e-53bebe059306",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4e99b0def325e423ad6804aff0320f82e4725b75c472ec8f81c7e80fe68505e6"
+  },
+  "id": "JeaTtOcGl4LZxk6d",
+  "tags": []
+}
